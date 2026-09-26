@@ -1,0 +1,45 @@
+# GitHub Actions से APK अपने आप बनेगा
+name: Build APKs
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Victim APK
+        run: |
+          cd VictimApp
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Build Admin APK
+        run: |
+          cd AdminApp
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Victim APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VictimApp-APK
+          path: VictimApp/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Admin APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AdminApp-APK
+          path: AdminApp/app/build/outputs/apk/debug/*.apk
